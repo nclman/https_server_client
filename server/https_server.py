@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 #Set logging config
 logging.basicConfig(filename='https_server.log', level=logging.INFO)
 
+from io import BytesIO
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -16,9 +17,22 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Hello, World!')
 
-    def do_POST(self):
+   def do_POST(self):
         logger.info("Received POST")
+        content_length = int(self.headers['Content-Length'])
+        body = self.rfile.read(content_length)
         self.send_response(200)
+        self.end_headers()
+
+        # Print body content of POST
+        print(body)
+
+        # Send response to client
+        response = BytesIO()
+        response.write(b'This is POST request. ')
+        response.write(b'Received: ')
+        response.write(body)
+        self.wfile.write(response.getvalue())
 
 def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8585):
     server_address = ('', port)
