@@ -9,7 +9,6 @@
 #include "httplib.h"
 #include <iostream>
 
-//#define CA_CERT_FILE "../certificates/ca-bundle.crt"
 #define CA_CERT_FILE "../certificates/rootCA.crt"
 
 using namespace std;
@@ -36,6 +35,13 @@ int main(void) {
       cout << "verify error: " << X509_verify_cert_error_string(result) << endl;
     }
 #endif
+  }
+
+  // Send a simple POST
+  string body("body");
+  if (auto res = cli.Post("/post", body, "application/octet-stream")) {
+    cout << res->status << endl;
+    cout << res->body << endl;
   }
 
   return 0;
