@@ -6,9 +6,9 @@ NAME=nopass
 openssl genrsa -out ${NAME}.key 2048
 
 # Generate keys with passcode
-openssl genrsa -des3 -out ${NAME}.key 2048
+#openssl genrsa -des3 -out ${NAME}.key 2048
 
-# Generate a CA certificate
+# Generate a CA certificate. Needs a password.
 #openssl req -x509 -sha256 -days 1825 -newkey rsa:2048 -keyout rootCA.key -out rootCA.crt
 
 openssl req -key ${NAME}.key -new -out ${NAME}.csr
