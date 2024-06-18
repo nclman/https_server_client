@@ -17,7 +17,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Hello, World!')
 
-   def do_POST(self):
+    def do_POST(self):
         logger.info("Received POST")
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
@@ -34,12 +34,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         response.write(body)
         self.wfile.write(response.getvalue())
 
-def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8585):
+def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8080):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     
     logger.info("Starting HTTP server on port %i", port)
-    print('running on port ' + str(port))
+    print('running HTTP server on port ' + str(port))
     httpd.serve_forever()
 
 
@@ -51,7 +51,7 @@ def run_https(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, p
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
     logger.info("Starting HTTPS server on port %i", port)
-    print('running on port ' + str(port))
+    print('running HTTPS server on port ' + str(port))
     httpd.serve_forever()
 
 
