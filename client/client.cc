@@ -23,9 +23,22 @@ int main(void) {
   httplib::Client cli("localhost", 8080);
 #endif
 
-  if (auto res = cli.Get("/hi")) {
-    cout << res->status << endl;
+  // Example for crafting headers
+  httplib::Headers headers = {
+    {"Content-Type", "application/octet-stream"}
+  };
+
+  // Send HEAD
+  if (auto res = cli.Head("/head", headers)) {
+    cout << "HEAD Response: " << res->status << endl;
     cout << res->get_header_value("Content-Type") << endl;
+    cout << res->body << endl;
+  }
+
+  if (auto res = cli.Get("/get")) {
+    cout << "GET Response: " << res->status << endl;
+    cout << "GET Content-Type: " << res->get_header_value("Content-Type") << endl;
+    cout << "GET Content-Length: " << res->get_header_value("Content-Length") << endl;
     cout << res->body << endl;
   } else {
     cout << "error code: " << res.error() << std::endl;
@@ -39,9 +52,18 @@ int main(void) {
 
   // Send a simple POST
   string body("body");
-  if (auto res = cli.Post("/post", body, "application/octet-stream")) {
-    cout << res->status << endl;
-    cout << res->body << endl;
+  if (auto res = cli.Post("/post", body, "application/octet-stream")) {   
+    cout << "POST Response: " << res->status << endl;
+    cout << "POST Content-Type: " << res->get_header_value("Content-Type") << endl;
+    cout << "POST Content-Length: " << res->get_header_value("Content-Length") << endl;
+
+    // Print content
+    int length = stoi(res->get_header_value("Content-Length"));
+
+    for (int i=0; i<length; i++) {
+      int c = res->body[i];
+      cout << hex << c << endl;
+    }
   }
 
   return 0;
