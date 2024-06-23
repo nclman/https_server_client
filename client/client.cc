@@ -72,8 +72,31 @@ int main(void) {
 
     for (int i=0; i<length; i++) {
       int c = res->body[i];
-      cout << hex << c << endl;
+      cout << hex << c << endl << dec;
     }
+  }
+
+  // Send an image file
+  cout << "POST: Send file" << endl;
+  string post_fname("cat.jpeg");
+  ifstream postfile("content//" + post_fname, ios::binary | ios::ate);
+
+  if (postfile.is_open()) {
+    streampos size = postfile.tellg();
+    char *buf = new char[size];
+
+    cout << "Size: " << std::to_string(size) << endl;
+    postfile.seekg(0, ios::beg);
+    postfile.read(buf, size);
+    postfile.close();
+
+    if (auto res = cli.Post("/" + post_fname, buf, size, "image/jpeg")) {
+      cout << "POST Response: " << res->status << endl;
+    } else {
+      cout << "error code: " << res.error() << std::endl;
+    }
+  } else {
+    cout << "POST: Failed to send file" << endl;
   }
 
   return 0;
