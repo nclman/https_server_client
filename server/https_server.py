@@ -58,17 +58,27 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         self.send_response(200)
-        self.send_header("Content-Type", "application/octet-stream")  # for binary data
-        self.send_header("Content-Length", str(len(postData)))
-        self.end_headers()
 
-        # Print body content of POST
-        print(body)
+        ext = self.path.split('.')[-1].lower()
+        if ext == 'jpg' or ext == 'jpeg':
+            print("Receiving JPEG file: " + str(content_length) + "bytes")
+            fsave = open("from_client" + self.path, "wb")
+            fsave.write(body)
+            fsave.close()
 
-        # Send binary response to client
-        response = BytesIO()
-        response.write(bytearray(postData))
-        self.wfile.write(response.getvalue())
+            self.end_headers()
+        else:
+            self.send_header("Content-Type", "application/octet-stream")  # for binary data
+            self.send_header("Content-Length", str(len(postData)))
+            self.end_headers()
+
+            # Print body content of POST
+            print(body)
+
+            # Send binary response to client
+            response = BytesIO()
+            response.write(bytearray(postData))
+            self.wfile.write(response.getvalue())
 
 def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8080):
     server_address = ('', port)
