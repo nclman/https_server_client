@@ -35,11 +35,21 @@ int main(void) {
     cout << res->body << endl;
   }
 
-  if (auto res = cli.Get("/get")) {
+  string filename("test_svr.json");
+  if (auto res = cli.Get("/" + filename)) {
     cout << "GET Response: " << res->status << endl;
     cout << "GET Content-Type: " << res->get_header_value("Content-Type") << endl;
     cout << "GET Content-Length: " << res->get_header_value("Content-Length") << endl;
-    cout << res->body << endl;
+
+    // Save the file locally
+    ofstream file(filename);
+    if (file.is_open()) {
+      file << res->body;
+      file.close();
+      cout << "Downloaded file" << endl;
+    } else {
+      cout << "Could not create file" << endl;
+    }
   } else {
     cout << "error code: " << res.error() << std::endl;
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
