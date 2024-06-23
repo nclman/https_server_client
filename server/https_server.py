@@ -19,17 +19,39 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "application/octet-stream") # this is sent
         self.end_headers()
-        self.wfile.write(b'HEAD response!') # does not get sent
+        self.wfile.write(b'HEAD response!') # this is not sent
         print(self.path)
 
     def do_GET(self):
         logger.info("Received GET")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/octet-stream")
-        self.send_header("Content-Length", str(len(getData.encode('utf-8'))))
-        self.end_headers()
-        self.wfile.write(bytearray(getData.encode('utf-8')))
         print(self.path)
+
+        try:
+            # is client is requesting a valid file? Files are in "server/content" folder
+            fdata = open("content" + self.path, "r").read()
+        except:
+            # No/invalid file. Send generic stuff.
+            self.send_response(200)
+            self.send_header("Content-Type", "application/octet-stream")
+            self.send_header("Content-Length", str(len(getData.encode('utf-8'))))
+            self.end_headers()
+            self.wfile.write(bytearray(getData.encode('utf-8')))
+        else:
+            # file exists. Send it
+            ext = self.path.split('.')[-1].lower()
+            if ext == 'json':
+                content_type = 'application/json'
+            elif ext == 'txt':
+                content_type = 'text/plain'
+            elif ext == 'png':
+                content_type = 'image/png'
+            else:
+                content_type = 'application/octet-stream'
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(fdata)))
+            self.end_headers()
+            self.wfile.write(bytearray(fdata.encode('utf-8')))
 
     def do_POST(self):
         logger.info("Received POST")
@@ -56,7 +78,6 @@ def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=80
     print('running HTTP server on port ' + str(port))
     httpd.serve_forever()
 
-
 def run_https(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8585, https=False, key=None, cert=None):
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile=cert, keyfile=key, password='')
@@ -67,7 +88,6 @@ def run_https(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, p
     logger.info("Starting HTTPS server on port %i", port)
     print('running HTTPS server on port ' + str(port))
     httpd.serve_forever()
-
 
 # Create argparse object
 def getArgs():
@@ -82,7 +102,6 @@ def getArgs():
     args = parser.parse_args()
 
     return args
-
 
 if __name__ == '__main__':
     Args=getArgs()
